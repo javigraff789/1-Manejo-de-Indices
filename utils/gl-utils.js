@@ -81,6 +81,19 @@ export function createVertexBuffer(gl, data) {
 
 /**
  * @param {WebGL2RenderingContext} gl
+ * @param {number[]} data
+ */
+export function createIndexBuffer(gl, data) {
+  const buffer = gl.createBuffer()
+  gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, buffer)
+  gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(data), gl.STATIC_DRAW)
+  gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null)
+
+  return buffer
+}
+
+/**
+ * @param {WebGL2RenderingContext} gl
  * @param {number} attributeLocation
  * @param {number} attributeSize
  * @param {WebGLBuffer} buffer
