@@ -1,4 +1,4 @@
-import { getCanvasElement, getWebGL2Context, createShader, createProgram, createVertexBuffer, bindAttributeToVertexBuffer } from "./utils/gl-utils.js"
+import { getCanvasElement, getWebGL2Context, createShader, createProgram, createVertexBuffer, bindAttributeToVertexBuffer, createIndexBuffer } from "./utils/gl-utils.js"
 import { vertexShaderSourceCode, fragmentShaderSourceCode } from "./utils/shaders.js"
 
 // #️⃣ Configuración base de WebGL
@@ -21,53 +21,56 @@ const vertexPositionLocation = gl.getAttribLocation(program, 'vertexPosition')
 
 // #️⃣ Definimos la info de la geometría que vamos a dibujar (un cuadrado)
 
-const vertexCount = 6
 const vertexPositions = [
-  // primer triangulo
-  -0.5, -0.5,
-  0.5, -0.5,
-  -0.5, 0.5,
-  // segundo triangulo
-  -0.5, 0.5,
-  0.5, -0.5,
-  0.5, 0.5
+  -0.5, -0.5, // 0 👈 indice de cada posición
+  0.5, -0.5,  // 1
+  0.5, 0.5,   // 2
+  -0.5, 0.5   // 3
 ]
 
-/* 📝 A la hora de dibujar algo en pantalla, el único idioma (o 'modo') que habla nuestro hardware
- * gráfico es el de los triángulos[^1]. Necesitas dibujar un cuadrado? Lo tenes que describir en
- * triángulos. Un Cubo? Triángulos. Un personaje del último Half Life? Tal cual, más triángulos.
- *
- * En el caso de nuestro simple cuadrado, lo estamos representando con 2 triángulos, cada uno con
- * sus respectivos 3 vertices (6 en total). Nótese que uno generalmente diría que un cuadrado tiene
- * 4 vertices, no 6; pero como tenemos que ir describiendo a cada uno de los triángulos que lo
- * conforman, terminamos describiendo 6 vertices, y repitiendo información. Al vértice (0.5, -0.5)
- * lo encontramos tanto en el primer triángulo como el segundo, igual que al vértice (-0.5, 0.5).
- * Esto, lo solucionamos con el uso de indices.
- *
- * [^1]: Habla algún que otro idioma, como el de lineas y el de puntos, pero no son los mas usados.
- * El modo es lo que estamos seteando cuando en gl.drawArrays(...) pasamos gl.TRIANGLES.
+const indices = [
+  // primer triangulo
+  0, 1, 3,
+  // segundo triangulo
+  3, 1, 2
+]
+
+/* 📝 Ya no hay posiciones de vertices repetidas! 🎉 Definimos cada uno de los 4 vertices una sola
+ * vez, y mediante indices, decimos cuales son los que usa cada triangulo.
  */
 
-// #️⃣ Guardamos la info del cuadrado (i.e. la posición de sus vértices) en Vertex Buffer Objects (VBOs)
+// #️⃣ Guardamos la info del cuadrado (i.e. la posición de sus vértices e indices) en VBOs e Index Buffer Objects (IBOs)
 
 const vertexPositionsBuffer = createVertexBuffer(gl, vertexPositions)
+const indexBuffer = createIndexBuffer(gl, indices)
 
-// #️⃣ Asociamos los atributos del programa a los buffers creados
+/* 📝 Desde el punto de vista de su almacenamiento, un buffer de indices no tiene nada de particular
+ * respecto a los buffers que veníamos usando (para las posiciones o los colores), es otro segmento
+ * de memoria con datos, que en este caso se limitan a ser de tipo entero. De hecho, si miran las
+ * implementaciones de createVertexBuffer y createIndexBuffer van a ver que son casi idénticas. La
+ * diferencia se ve en cómo se obtiene la información de cada vértice a la hora de dibujarlos. Mas
+ * detalle en breve.
+ */
 
-// Creamos un Vertex Array Object (VAO), encargado de tomar nota de cada conexión atributo-buffer
+// #️⃣ Asociamos los atributos del programa a los buffers creados, y establecemos el buffer de indices a usar
+
+// Creamos un Vertex Array Object (VAO)
 const vertexArray = gl.createVertexArray()
 
-// A partir de aca, el VAO registra cada atributo habilitado y su conexión con un buffer
+// A partir de aca, el VAO registra cada atributo habilitado y su conexión con un buffer, junto con los indices
 gl.bindVertexArray(vertexArray)
 
 // Habilitamos cada atributo y lo conectamos a su buffer
 gl.enableVertexAttribArray(vertexPositionLocation)
 bindAttributeToVertexBuffer(gl, vertexPositionLocation, 2, vertexPositionsBuffer)
 
+// Conectamos el buffer de indices que vamos a usar
+gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer)
+
 // Dejamos de tomar nota en el VAO
 gl.bindVertexArray(null)
 
-// #️⃣ Establecemos el programa a usar y sus conexiónes atributo-buffer (el VAO)
+// #️⃣ Establecemos el programa a usar, sus conexiónes atributo-buffer e indices a usar (guardado en el VAO)
 
 gl.useProgram(program)
 gl.bindVertexArray(vertexArray)
@@ -78,4 +81,14 @@ gl.bindVertexArray(vertexArray)
 gl.clear(gl.COLOR_BUFFER_BIT)
 
 // Y dibujamos 🎨
-gl.drawArrays(gl.TRIANGLES, 0, vertexCount)
+gl.drawElements(gl.TRIANGLES, indices.length, gl.UNSIGNED_SHORT, 0)
+
+/* 📝 Para usar los indices del indexBuffer, pasamos de usar gl.drawArrays(...) a usar
+ * gl.drawElements(...). Con drawArrays, lo que veníamos haciendo, era leer directamente del buffer
+ * vertexPositionsBuffer la posición de cada uno de los vértice de los triángulos, de forma
+ * secuencial. Las primeras tres para el primer triangulo, las otras tres para el segundo
+ * (repitiendo posiciones si hacia falta). Ahora, estamos agregando un nivel de indirección a las
+ * posiciones, un "alias" para cada una, por medio de indices. A la hora de obtener info para un
+ * vértice, primero se mira el buffer de indices, y con el indice que encontramos, vamos al
+ * buffer de posiciones.
+ */
