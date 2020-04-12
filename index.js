@@ -38,10 +38,16 @@ const vertexColors = [
 
 const indices = [
   // primer triangulo
-  0, 1, 3,
+  0, 1,
+  1, 3,
+  3, 0,
   // segundo triangulo
-  3, 1, 2
+  3, 1,
+  1, 2,
+  2, 3
 ]
+
+/* 📝 Describimos las tres lineas que conforman a cada triangulo */
 
 // #️⃣ Guardamos la info del cuadrado (i.e. posiciones, colores e indices) en VBOs e IBOs
 
@@ -80,4 +86,4 @@ gl.bindVertexArray(vertexArray)
 gl.clear(gl.COLOR_BUFFER_BIT)
 
 // Y dibujamos 🎨
-gl.drawElements(gl.TRIANGLES, indices.length, gl.UNSIGNED_SHORT, 0)
+gl.drawElements(gl.LINES, indices.length, gl.UNSIGNED_SHORT, 0)
