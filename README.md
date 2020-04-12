@@ -9,6 +9,7 @@
 - `sin indices`
 - `con indices`
 - `gradiente`
+- `wireframe`
 
 ### Referencias 📚
 
