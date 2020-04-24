@@ -23,25 +23,78 @@ const vertexColorLocation = gl.getAttribLocation(program, 'vertexColor')
 // #️⃣ Definimos la info de la geometría que vamos a dibujar (un cuadrado)
 
 const vertexPositions = [
+  
+  
+  0.0, 0.8, // 0 👈 indice de cada posición
+  0.2, 0.3,  // 1
+  0.7, 0.1,   // 2
+  0.3, -0.1,   // 3
+  0.4, -0.7,
+  0.0,-0.3,
+  -0.4, -0.7,
+  -0.3,-0.1,
+  -0.7, 0.1,
+  -0.2, 0.3,
+
+]
+
+/*Los vertices exteriores de mi estrella son
+0,2,4,6,7,9
+les doy un*/
+
+const indices = [
+  // primer triangulo
+  0, 1, 9,
+  // segundo triangulo
+  1, 3, 2,
+  //tercer
+  3,4,5,
+  //cuarto
+  5,6,7,
+  //quinto
+  7,8,9,
+  //sexto
+  5,1,3,
+  //septimo
+  5,9,7,
+  //octavo
+  9,1,5,
+]
+
+//vertices exteriores son 0,2,4,7,9
+
+const vertexColors = [
+  1, 1, 0,    // 0 👈 indice de cada color
+  1, 0, 0,    
+  1, 1, 0,    //2
+  1, 0, 0,
+  1, 1, 0,    //4
+  1, 0, 0,
+  1, 1, 0,    //6
+  1, 0, 0,
+  1, 1, 0,    //8
+  1, 0, 0,
+  
+]
+
+
+/*
+const vertexPositions = [
   -0.5, -0.5, // 0 👈 indice de cada posición
   0.5, -0.5,  // 1
   0.5, 0.5,   // 2
   -0.5, 0.5   // 3
 ]
+*/
 
-const vertexColors = [
-  1, 1, 1,    // 0 👈 indice de cada color
-  1, 0, 0,    // 1
-  0, 1, 0,    // 2
-  0, 0, 1     // 3
-]
 
+/*
 const indices = [
   // primer triangulo
   0, 1, 3,
   // segundo triangulo
   3, 1, 2
-]
+]*/
 
 // #️⃣ Guardamos la info del cuadrado (i.e. posiciones, colores e indices) en VBOs e IBOs
 
